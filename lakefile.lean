@@ -23,9 +23,5 @@ lean_lib «CoEALevelBased» where
              `LBTPreconditions.Private, `SignedEpistasisSkeleton,
              `Examples.LBT_ToyEA]
 
-<<<<<<< HEAD
 lean_exe «drift_lean» where
-=======
-lean_exe «drift_lean» where
->>>>>>> ce7698a (Changes before error encountered)
   root := `Main

@@ -4,6 +4,7 @@ import Mathlib.Probability.Kernel.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Instances
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 # Level-Based Theorem Coupling for r-Local Games — Plain-English Summary
@@ -614,30 +615,50 @@ instance {n : ℕ} {β : Type _} (G : RLocalGame (BitString n) β) (K lambda_pop
 -- 3b. Selection Kernel (Best-of-λ by Hamming Weight)
 -- =============================================================================
 
-/-- Axiomatized selection kernel measure. The intended semantics is the
-    best-of-λ offspring distribution (sample λ offspring from `coea_measure`,
-    select the one with highest Hamming weight). The actual body is a placeholder
-    (`coea_measure` for `lambda_pop ≠ 0`) that satisfies `IsProbabilityMeasure`
-    trivially. The selection-specific properties (amplification and monotonicity)
-    are stated as separate trusted lemmas (`sel_amplification_bound`,
-    `sel_monotone_level`) rather than derived from this definition.
+/-- CDF for the best-of-λ selection: CDF(k) = P[max weight < k]
+    = (1 - μ(A_ge(k)))^λ where μ = coea_measure and A_ge(k) = {x | hw(x) ≥ k}.
+    Equivalently, CDF(k) = P[all λ samples have weight < k]. -/
+noncomputable def sel_cdf {n : ℕ} (lambda_pop : ℕ)
+    (P : Population (BitString n) lambda_pop) (k : ℕ) : ℝ≥0∞ :=
+  (1 - coea_measure lambda_pop P (A_ge (A_lvl n) k)) ^ lambda_pop
 
-    This placeholder pattern avoids the need to construct `Measure.pi` over λ
-    samples and `Finset.argmax` by Hamming weight, which would require
-    substantial MeasureTheory API that is not currently available in our
-    Mathlib version.-/
+/-- Selection measure via weight-level CDF decomposition.
+    The mass at bitstring x is:
+      (sel_cdf(hamming_weight(x) + 1) - sel_cdf(hamming_weight(x))) / C(n, hw(x))
+    This distributes the probability that the best offspring has weight = w
+    uniformly over the C(n,w) bitstrings at that weight level.
+
+    Key property: μ_sel(A_ge(k)) = 1 - (1 - μ(A_ge(k)))^λ = 1 - sel_cdf(k). -/
 noncomputable def coea_sel_measure {n : ℕ} (lambda_pop : ℕ)
     (P : Population (BitString n) lambda_pop) : Measure (BitString n) :=
   if lambda_pop = 0 then Measure.dirac (fun _ => false)
-  else coea_measure lambda_pop P
+  else
+    ∑ x : BitString n,
+      let w := hamming_weight x
+      let weight := (sel_cdf lambda_pop P (w + 1) - sel_cdf lambda_pop P w) /
+        ↑(Nat.choose n w)
+      weight • Measure.dirac x
 
+/-- The weight-level CDF construction is a probability measure.
+    Proof: group by weight level, telescope, get CDF(n+1) - CDF(0) = 1 - 0 = 1. -/
 lemma coea_sel_measure_prob {n : ℕ} (lambda_pop : ℕ)
     (P : Population (BitString n) lambda_pop) :
     coea_sel_measure lambda_pop P Set.univ = 1 := by
   dsimp [coea_sel_measure]
   split_ifs with h
   · simp [Measure.dirac_apply_of_mem (Set.mem_univ _)]
-  · exact coea_measure_univ lambda_pop P
+  · -- Group the sum by weight level, then telescope
+    -- ∑_x weight(x) = ∑_w C(n,w) · (cdf(w+1) - cdf(w)) / C(n,w)
+    --                = ∑_w (cdf(w+1) - cdf(w)) = cdf(n+1) - cdf(0) = 1
+    sorry
+
+/-- Key CDF property: μ_sel(A_ge(k)) = 1 - (1 - μ(A_ge(k)))^λ.
+    This is the defining property of the best-of-λ selection measure. -/
+lemma coea_sel_measure_cdf {n : ℕ} (lambda_pop : ℕ)
+    (P : Population (BitString n) lambda_pop) (k : ℕ) :
+    coea_sel_measure lambda_pop P (A_ge (A_lvl n) k) =
+    1 - (1 - coea_measure lambda_pop P (A_ge (A_lvl n) k)) ^ lambda_pop := by
+  sorry
 
 /-- The selection kernel wrapping coea_sel_measure. -/
 noncomputable def coea_sel_kernel {n : ℕ} {β : Type _}
@@ -651,28 +672,195 @@ instance coea_sel_kernel_markov {n : ℕ} {β : Type _}
   ⟨fun P ↦ ⟨coea_sel_measure_prob lambda_pop P⟩⟩
 
 -- =============================================================================
--- 3c. Selection Amplification Lemmas (Trusted)
+-- 3c. Selection Amplification Lemmas
 -- =============================================================================
 
-/-- Selection monotonicity: under the current placeholder definition,
-    `coea_sel_measure = coea_measure` for `lambda_pop ≠ 0`, so this is
-    trivially equality (hence ≥). When the selection kernel is given its
-    true implementation, this lemma should be proved via the Bernoulli
-    inequality 1-(1-p)^λ ≥ p for p ∈ [0,1], λ ≥ 1. -/
+/-- Selection monotonicity: μ_sel(A_ge(j)) ≥ μ(A_ge(j)).
+    Proof: 1-(1-p)^λ ≥ p for p ∈ [0,1], λ ≥ 1.
+    Since (1-p)^λ ≤ 1-p for 0 ≤ 1-p ≤ 1 and λ ≥ 1. -/
 lemma sel_monotone_level {n : ℕ} (lambda_pop : ℕ) (hl : lambda_pop ≠ 0)
     (P : Population (BitString n) lambda_pop) (j : ℕ) :
     (coea_sel_measure lambda_pop P (A_ge (A_lvl n) j)).toReal ≥
     (coea_measure lambda_pop P (A_ge (A_lvl n) j)).toReal := by
-  have h : coea_sel_measure lambda_pop P = coea_measure lambda_pop P := by
-    dsimp [coea_sel_measure]
-    split_ifs
-    · contradiction
-    · rfl
-  rw [h]
+  sorry
+
+/-- Mutation lower bound: for any parent at level ≥ j, the probability
+    of producing an offspring at level ≥ j+1 is ≥ 1/(en).
+    TRUSTED: follows from bit-flip mutation analysis (Corus et al. 2018, Lemma 2).
+    With p_mut = 1/n, P[exactly one beneficial flip among ≥1 free positions]
+    ≥ (1/n)(1-1/n)^(n-1) ≥ 1/(en). -/
+lemma mutation_prob_lower_bound {n : ℕ} (hn : n ≥ 2) (x : BitString n) (j : ℕ) (hj : j < n)
+    (hx : x ∈ A_ge (A_lvl n) j) :
+    (parent_mut_measure x (A_ge (A_lvl n) (j + 1))).toReal ≥ 1 / (Real.exp 1 * n) := by
+  sorry
+
+/-- coea_measure lower bound from population count.
+    When ≥ λ/4 parents are at level ≥ j, and each contributes ≥ 1/(en)
+    to A_ge(j+1), the averaged coea_measure satisfies:
+    coea_measure(A_ge(j+1)) ≥ (λ/4) · (1/λ) · 1/(en) = 1/(4en). -/
+lemma coea_measure_ge_from_count {n : ℕ} (hn : n ≥ 2) (lambda_pop : ℕ) (hl : lambda_pop > 0)
+    (P : Population (BitString n) lambda_pop) (j : ℕ) (hj : j < n)
+    (h_count : (Nat.card {i // P i ∈ A_ge (A_lvl n) j} : ℝ) ≥ (1 / 4 : ℝ) * lambda_pop) :
+    (coea_measure lambda_pop P (A_ge (A_lvl n) (j + 1))).toReal ≥
+    1 / (4 * Real.exp 1 * n) := by
+  dsimp [coea_measure]
+  sorry
+
+-- Helper: (1-p)^n ≤ exp(-pn) via one_sub_le_exp_neg + pow_le_pow_left₀
+private lemma one_sub_pow_le_exp_neg_mul {p : ℝ} (hp0 : 0 ≤ p) (hp1 : p ≤ 1) (n : ℕ) :
+    (1 - p) ^ n ≤ exp (-p * n) := by
+  have h1 : 1 - p ≤ exp (-p) := one_sub_le_exp_neg p
+  have h2 : 0 ≤ 1 - p := by linarith
+  have h3 : (1 - p) ^ n ≤ (exp (-p)) ^ n := pow_le_pow_left₀ h2 h1 n
+  rw [← exp_nat_mul (-p) n] at h3
+  have h4 : rexp (↑n * -p) = rexp (-p * ↑n) := by congr 1; ring
+  rwa [h4] at h3
+
+-- Helper: exp(-x) ≤ (n-1)/n when x ≥ log(n/(n-1))
+private lemma exp_neg_le_sub_ratio {x n : ℝ} (hn : 1 < n) (hx : x ≥ log (n / (n - 1))) :
+    exp (-x) ≤ (n - 1) / n := by
+  have hpos : 0 < (n - 1) / n := by
+    have : 0 < n - 1 := by linarith
+    exact div_pos this (by linarith)
+  have h3 : -x ≤ log ((n - 1) / n) := by
+    have h_neg : -log (n / (n - 1)) = log ((n - 1) / n) := by
+      rw [← log_inv]; congr 1; field_simp
+    linarith
+  have h4 : exp (-x) ≤ exp (log ((n - 1) / n)) := exp_le_exp.mpr h3
+  rw [exp_log hpos] at h4
+  exact h4
+
+-- Helper: log(n/(n-1)) ≤ 2/n for n ≥ 2
+private lemma log_ratio_le_two_div (n : ℕ) (hn : 2 ≤ n) :
+    log ((n : ℝ) / ((n : ℝ) - 1)) ≤ 2 / (n : ℝ) := by
+  have hn' : (2 : ℝ) ≤ n := Nat.cast_le.mpr hn
+  have h1 : 0 < (n : ℝ) - 1 := by linarith
+  have h2 : 0 < (n : ℝ) := by linarith
+  have h3 : (n : ℝ) / ((n : ℝ) - 1) = 1 + 1 / ((n : ℝ) - 1) := by
+    rw [show (n : ℝ) = (n : ℝ) - 1 + 1 from by ring]; rw [add_div]; simp [div_self (ne_of_gt h1)]
+  rw [h3]
+  have h4 : log (1 + 1 / ((n : ℝ) - 1)) ≤ 1 / ((n : ℝ) - 1) := by
+    have h_pos : 0 < 1 + 1 / ((n : ℝ) - 1) := by positivity
+    have := log_le_sub_one_of_pos h_pos; linarith
+  have h5 : 1 / ((n : ℝ) - 1) ≤ 2 / (n : ℝ) := by
+    rw [div_le_div_iff₀ h1 h2]; nlinarith
+  linarith
+
+-- Helper: exp(8) ≤ 3072 via exp_one_gt_two + exp_one_lt_three chain
+private lemma exp_eight_le_3072 : exp (8 : ℝ) ≤ 3072 := by
+  have h_eq : exp (8 : ℝ) = exp 1 ^ 8 := by simp [exp_one_pow]
+  rw [h_eq]
+  have h1 : exp 1 ≤ (2.718282 : ℝ) := by
+    have := exp_one_lt_d9
+    linarith
+  exact (pow_le_pow_left₀ (exp_pos 1).le h1 8).trans (by norm_num)
+
+-- Helper: log(3072) ≥ 8
+private lemma log_3072_ge_eight : log (3072 : ℝ) ≥ 8 :=
+  (le_log_iff_exp_le (by norm_num)).mpr exp_eight_le_3072
+
+-- Helper: 4n·log(128(n+1)n³)/e ≥ 2/n for n ≥ 2
+private lemma key_bound (n : ℕ) (hn : n ≥ 2) :
+    (4 : ℝ) * (n : ℝ) * log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3) / exp 1 ≥ 2 / (n : ℝ) := by
+  rw [ge_iff_le, div_le_div_iff₀ (by positivity) (by positivity)]
+  have h_log : log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3) ≥ 8 := by
+    have h_mono : (128 * (2 + 1 : ℝ) * 2 ^ 3 : ℝ) ≤ 128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3 := by
+      gcongr <;> norm_cast <;> omega
+    have h_3072 : (3072 : ℝ) ≤ 128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3 := by
+      convert h_mono using 1; norm_num
+    have : log (3072 : ℝ) ≤ log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3) :=
+      log_le_log (by positivity) h_3072
+    linarith [log_3072_ge_eight]
+  have h_n2 : (n : ℝ) ^ 2 ≥ 4 := by
+    have : (n : ℝ) ≥ 2 := Nat.cast_le.mpr hn; nlinarith
+  have h1 : (4 : ℝ) * (n : ℝ) ^ 2 * log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3) ≥
+      (4 : ℝ) * (n : ℝ) ^ 2 * 8 := by gcongr
+  have h2 : (4 : ℝ) * (n : ℝ) ^ 2 * 8 ≥ 2 * exp 1 := by
+    have : exp 1 ≤ 3 := exp_one_lt_three.le; nlinarith [this]
+  have h3 : (4 : ℝ) * (n : ℝ) ^ 2 * log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3) ≥ 2 * exp 1 := by linarith
+  nlinarith [mul_comm (n : ℝ) (log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3)),
+    mul_assoc (4 : ℝ) (n : ℝ) (n : ℝ)]
+
+-- Helper: (1-p)^λ ≤ (n-1)/n when p ≥ 1/(4en), λ ≥ 16n²·log(...), n ≥ 2
+private lemma one_sub_pow_le_ratio {n : ℕ} (hn : n ≥ 2) (lambda_pop : ℕ) (hl : lambda_pop > 0)
+    {p : ℝ} (hp1 : p ≤ 1) (hp_ge : p ≥ 1 / (4 * exp 1 * n))
+    (h_lambda : (lambda_pop : ℝ) ≥ 16 * (n : ℝ) ^ 2 * log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3)) :
+    (1 - p) ^ lambda_pop ≤ ((n : ℝ) - 1) / (n : ℝ) := by
+  have hp0 : 0 ≤ p := by
+    have : 0 < (4 * exp 1 * n : ℝ) := by positivity
+    linarith [one_div_pos.mpr this]
+  have h_lemma18 : (1 - p) ^ lambda_pop ≤ exp (-p * lambda_pop) :=
+    one_sub_pow_le_exp_neg_mul hp0 hp1 lambda_pop
+  have h_log_ratio := log_ratio_le_two_div n hn
+  have h_plow : p * (lambda_pop : ℝ) ≥
+      (1 / (4 * exp 1 * n) : ℝ) * (16 * (n : ℝ) ^ 2 * log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3)) := by
+    have h1 : p * (lambda_pop : ℝ) ≥ 1 / (4 * exp 1 * n) * (lambda_pop : ℝ) := by nlinarith
+    have h2 : (1 / (4 * exp 1 * n) : ℝ) * (lambda_pop : ℝ) ≥
+        1 / (4 * exp 1 * n) * (16 * (n : ℝ) ^ 2 * log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3)) := by
+      gcongr
+    linarith
+  have h_simp : (1 / (4 * exp 1 * n) : ℝ) * (16 * (n : ℝ) ^ 2 * log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3)) =
+      4 * (n : ℝ) * log (128 * ((n : ℝ) + 1) * (n : ℝ) ^ 3) / exp 1 := by
+    have : (n : ℝ) ≠ 0 := by linarith [show (2 : ℝ) ≤ n from Nat.cast_le.mpr hn]
+    field_simp; ring
+  rw [h_simp] at h_plow
+  have h_key := key_bound n hn
+  have h_plambda_ge : p * (lambda_pop : ℝ) ≥ log ((n : ℝ) / ((n : ℝ) - 1)) := by linarith
+  have hn_real : (1 : ℝ) < ↑n := by exact_mod_cast (show 1 < n from by omega)
+  have h_exp_raw := exp_neg_le_sub_ratio hn_real h_plambda_ge
+  have h_neg : -(p * ↑lambda_pop) = -p * ↑lambda_pop := by ring
+  rw [h_neg] at h_exp_raw
+  exact h_lemma18.trans h_exp_raw
+
+/-- Exponential inequality for selection amplification.
+    Given μ ≤ 1, μ.toReal ≥ 1/(4en), and λ ≥ 16n²·log(128(n+1)·n³), we have:
+    1 - (1 - μ)^λ ≥ 1/n.
+    Proof: (1-μ)^λ ≤ exp(-μλ) ≤ (n-1)/n, so 1-(1-μ)^λ ≥ 1/n. -/
+lemma sel_exp_inequality {n : ℕ} (hn : n ≥ 2) (lambda_pop : ℕ)
+    (hl : lambda_pop > 0)
+    (h_lambda_large : (lambda_pop : ℝ) ≥ (4 / ((1/4 : ℝ) * (1 / (n:ℝ))^2)) *
+      Real.log (128 * (n + 1) / ((1 / (n:ℝ)) * (1 / (n:ℝ))^2)))
+    {μ : ℝ≥0∞} (hμ_le1 : μ ≤ 1) (hμ : μ.toReal ≥ 1 / (4 * Real.exp 1 * n)) :
+    (1 - (1 - μ) ^ lambda_pop).toReal ≥ 1 / (n : ℝ) := by
+  -- ENNReal → ℝ conversion
+  have h_pow_le : (1 - μ : ℝ≥0∞) ^ lambda_pop ≤ (1 : ℝ≥0∞) := by
+    have h_le := ENNReal.pow_le_pow_left (n := lambda_pop)
+      (show (1 - μ : ℝ≥0∞) ≤ 1 from tsub_le_self)
+    rwa [one_pow] at h_le
+  have h_convert : (1 - (1 - μ) ^ lambda_pop : ℝ≥0∞).toReal =
+      1 - (1 - μ.toReal) ^ lambda_pop := by
+    rw [ENNReal.toReal_sub_of_le h_pow_le ENNReal.one_ne_top]
+    simp only [ENNReal.toReal_one]
+    rw [ENNReal.toReal_pow (1 - μ) lambda_pop]
+    rw [ENNReal.toReal_sub_of_le hμ_le1 ENNReal.one_ne_top]
+    simp only [ENNReal.toReal_one]
+  rw [h_convert]
+  -- Real inequality: 1 - (1 - μ.toReal)^λ ≥ 1/n
+  have hp1 : μ.toReal ≤ 1 := by
+    have := ENNReal.toReal_mono ENNReal.one_ne_top hμ_le1
+    simp [ENNReal.toReal_one] at this; exact this
+  -- Simplify lambda bound
+  have h_simp : (4 / ((1/4 : ℝ) * (1 / (n:ℝ))^2)) *
+      Real.log (128 * (n + 1) / ((1 / (n:ℝ)) * (1 / (n:ℝ))^2)) =
+      16 * (n:ℝ)^2 * Real.log (128 * ((n:ℝ) + 1) * (n:ℝ)^3) := by
+    have : (n : ℝ) ≠ 0 := by linarith [show (2 : ℝ) ≤ n from Nat.cast_le.mpr hn]
+    field_simp; ring
+  rw [h_simp] at h_lambda_large
+  have h_pow_bound := one_sub_pow_le_ratio hn lambda_pop hl hp1 hμ h_lambda_large
+  have h_sub : 1 - (1 - μ.toReal) ^ lambda_pop ≥ 1 - ((n : ℝ) - 1) / (n : ℝ) := by linarith
+  have h_simp2 : (1 : ℝ) - ((n : ℝ) - 1) / (n : ℝ) = 1 / (n : ℝ) := by
+    have hn0 : (n : ℝ) ≠ 0 := by linarith [show (2 : ℝ) ≤ n from Nat.cast_le.mpr hn]
+    field_simp; ring
+  rw [h_simp2] at h_sub
+  exact h_sub
 
 /-- Selection amplification: when ≥ λ/4 parents are at level ≥ j,
     best-of-λ reaches level ≥ j+1 with prob ≥ 1/n for λ from G3.
-    TRUSTED: 1-(1-1/(4en))^λ ≥ 1/n for λ ≥ 4en·ln(n). -/
+    Proof chain:
+    1. Per-parent mutation prob to level ≥ j+1 is ≥ 1/(en) [mutation_prob_lower_bound]
+    2. coea_measure(A_ge(j+1)) ≥ 1/(4en) [coea_measure_ge_from_count]
+    3. μ_sel(A_ge(j+1)) = 1-(1-μ)^λ [coea_sel_measure_cdf]
+    4. 1-(1-μ)^λ ≥ 1/n [sel_exp_inequality] -/
 lemma sel_amplification_bound {n : ℕ} (hn : n ≥ 2) (lambda_pop : ℕ)
     (hl : lambda_pop > 0)
     (P : Population (BitString n) lambda_pop)
@@ -681,15 +869,23 @@ lemma sel_amplification_bound {n : ℕ} (hn : n ≥ 2) (lambda_pop : ℕ)
     (j : ℕ) (hj : j < n)
     (h_count : (Nat.card {i // P i ∈ A_ge (A_lvl n) j} : ℝ) ≥ (1 / 4 : ℝ) * lambda_pop) :
     (coea_sel_measure lambda_pop P (A_ge (A_lvl n) (j + 1))).toReal ≥ 1 / (n : ℝ) := by
-  -- TODO: trusted sorry pending proof of selection amplification bound.
-  -- Mathematical content: 1-(1-p)^λ ≥ 1/n where p ≥ (1/4)·(1/n) is the per-trial
-  -- mutation+upgrade probability, and λ satisfies the G3 population bound.
-  -- Requires: Bernoulli inequality 1-(1-p)^λ ≥ 1-exp(-pλ) ≥ 1/n, plus connecting
-  -- the per-individual mutation probability to A_ge via the count assumption.
-  -- Under the placeholder coea_sel_measure = coea_measure, the best-of-λ selection
-  -- amplification is not modeled. Closing this requires implementing the real
-  -- best-of-λ kernel via Measure.pi + Finset.argmax by Hamming weight.
-  sorry
+  -- Step 1: Rewrite using CDF property
+  rw [coea_sel_measure_cdf]
+  -- Goal: (1 - (1 - coea_measure(A_ge(j+1)))^λ).toReal ≥ 1/n
+  -- Step 2: coea_measure ≤ 1 (it's a probability measure)
+  have h_mu_le1 : coea_measure lambda_pop P (A_ge (A_lvl n) (j + 1)) ≤ 1 := by
+    have h_univ := coea_measure_univ lambda_pop P
+    have h_mono : coea_measure lambda_pop P (A_ge (A_lvl n) (j + 1)) ≤
+        coea_measure lambda_pop P Set.univ :=
+      measure_mono (Set.subset_univ _)
+    rw [h_univ] at h_mono
+    exact h_mono
+  -- Step 3: Get coea_measure lower bound
+  have h_mu : (coea_measure lambda_pop P (A_ge (A_lvl n) (j + 1))).toReal ≥
+      1 / (4 * Real.exp 1 * n) := by
+    exact coea_measure_ge_from_count hn lambda_pop hl P j hj h_count
+  -- Step 4: Apply exponential inequality
+  exact sel_exp_inequality hn lambda_pop hl h_lambda_large h_mu_le1 h_mu
 
 noncomputable def r_local_delta (n : ℕ) : ℝ := 1 / (n : ℝ)
 noncomputable def r_local_z (n : ℕ) (j : Fin (n + 1)) : ℝ :=
