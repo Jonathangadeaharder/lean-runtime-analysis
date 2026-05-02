@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Capstone Validation</title>
+<link rel="prev" href="sect0006.html" title="Applications" />
+<link rel="up" href="index.html" title="Level-Based Theorem Formalization" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Level-Based Theorem Formalization</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Preliminaries</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0001.html#lem:hoeffding"><span class="toc_ref">1.1</span> <span class="toc_entry">Probability foundations</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#def:ranking_gap"><span class="toc_ref">1.2</span> <span class="toc_entry">Ranking and selection</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">2</span> <span class="toc_entry">Drift Theorems</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0002.html#thm:additive_drift"><span class="toc_ref">2.1</span> <span class="toc_entry">Additive drift</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html#thm:multiplicative_drift"><span class="toc_ref">2.2</span> <span class="toc_entry">Multiplicative drift</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html#thm:negative_drift"><span class="toc_ref">2.3</span> <span class="toc_entry">Negative drift</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">3</span> <span class="toc_entry">Game Theory</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0003.html#thm:minimax"><span class="toc_ref">3.1</span> <span class="toc_entry">Minimax theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html#lem:witness_drift"><span class="toc_ref">3.2</span> <span class="toc_entry">Witness games</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html#lem:veto_bounds"><span class="toc_ref">3.3</span> <span class="toc_entry">Veto mechanism</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">4</span> <span class="toc_entry">Linear Ranking and LBT Preconditions</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0004.html#thm:linear_ranking"><span class="toc_ref">4.1</span> <span class="toc_entry">Linear ranking theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html#lem:sel_amplification"><span class="toc_ref">4.2</span> <span class="toc_entry">Selection amplification</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">5</span> <span class="toc_entry">Coupling Arguments</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0005.html#lem:g2_monotonicity"><span class="toc_ref">5.1</span> <span class="toc_entry">LBT Coupling</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html#thm:runtime_bound"><span class="toc_ref">5.2</span> <span class="toc_entry">Runtime bounds</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0006.html"><span class="toc_ref">6</span> <span class="toc_entry">Applications</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0006.html#thm:fifo_trap_runtime"><span class="toc_ref">6.1</span> <span class="toc_entry">FIFO trap obstruction</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html#lem:epistasis_bounds"><span class="toc_ref">6.2</span> <span class="toc_entry">Signed epistasis</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html#thm:simultaneous_persistence"><span class="toc_ref">6.3</span> <span class="toc_entry">Simultaneous persistence</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active current">
+  <a href="sect0007.html"><span class="toc_ref">7</span> <span class="toc_entry">Capstone Validation</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="sect0007.html#thm:full_paper_capstone"><span class="toc_ref">7.1</span> <span class="toc_entry">Unified paper validation</span></a>
+ </li>
+
+  </ul>
+ </li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000008">7 Capstone Validation</h1>
+<h1 id="thm:full_paper_capstone">7.1 Unified paper validation</h1>
+<p> [Full paper capstone]  The 28 conjuncts of the paper are formally verified, covering: </p>
+<ol class="enumerate">
+  <li><p>LBT preconditions (G1, G2, G3) </p>
+</li>
+  <li><p>Linear ranking theorem </p>
+</li>
+  <li><p>Selection amplification </p>
+</li>
+  <li><p>Coupling arguments </p>
+</li>
+  <li><p>Runtime bounds </p>
+</li>
+  <li><p>Applications (FIFO traps, epistasis, persistence) </p>
+</li>
+</ol>
+<p> UnifiedPaperValidation.full_paper_capstone thm:linear_ranking, thm:runtime_bound, thm:fifo_trap_runtime, lem:epistasis_bounds, thm:simultaneous_persistence   </p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0006.html" title="Applications"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Level-Based Theorem Formalization"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

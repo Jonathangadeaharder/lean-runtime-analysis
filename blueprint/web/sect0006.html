@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Applications</title>
+<link rel="next" href="sect0007.html" title="Capstone Validation" />
+<link rel="prev" href="sect0005.html" title="Coupling Arguments" />
+<link rel="up" href="index.html" title="Level-Based Theorem Formalization" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Level-Based Theorem Formalization</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="sect0001.html"><span class="toc_ref">1</span> <span class="toc_entry">Preliminaries</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0001.html#lem:hoeffding"><span class="toc_ref">1.1</span> <span class="toc_entry">Probability foundations</span></a>
+ </li>
+<li class="">
+  <a href="sect0001.html#def:ranking_gap"><span class="toc_ref">1.2</span> <span class="toc_entry">Ranking and selection</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">2</span> <span class="toc_entry">Drift Theorems</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0002.html#thm:additive_drift"><span class="toc_ref">2.1</span> <span class="toc_entry">Additive drift</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html#thm:multiplicative_drift"><span class="toc_ref">2.2</span> <span class="toc_entry">Multiplicative drift</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html#thm:negative_drift"><span class="toc_ref">2.3</span> <span class="toc_entry">Negative drift</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">3</span> <span class="toc_entry">Game Theory</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0003.html#thm:minimax"><span class="toc_ref">3.1</span> <span class="toc_entry">Minimax theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html#lem:witness_drift"><span class="toc_ref">3.2</span> <span class="toc_entry">Witness games</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html#lem:veto_bounds"><span class="toc_ref">3.3</span> <span class="toc_entry">Veto mechanism</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">4</span> <span class="toc_entry">Linear Ranking and LBT Preconditions</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0004.html#thm:linear_ranking"><span class="toc_ref">4.1</span> <span class="toc_entry">Linear ranking theorem</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html#lem:sel_amplification"><span class="toc_ref">4.2</span> <span class="toc_entry">Selection amplification</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">5</span> <span class="toc_entry">Coupling Arguments</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0005.html#lem:g2_monotonicity"><span class="toc_ref">5.1</span> <span class="toc_entry">LBT Coupling</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html#thm:runtime_bound"><span class="toc_ref">5.2</span> <span class="toc_entry">Runtime bounds</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active current">
+  <a href="sect0006.html"><span class="toc_ref">6</span> <span class="toc_entry">Applications</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="sect0006.html#thm:fifo_trap_runtime"><span class="toc_ref">6.1</span> <span class="toc_entry">FIFO trap obstruction</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html#lem:epistasis_bounds"><span class="toc_ref">6.2</span> <span class="toc_entry">Signed epistasis</span></a>
+ </li>
+<li class="">
+  <a href="sect0006.html#thm:simultaneous_persistence"><span class="toc_ref">6.3</span> <span class="toc_entry">Simultaneous persistence</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">7</span> <span class="toc_entry">Capstone Validation</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0007.html#thm:full_paper_capstone"><span class="toc_ref">7.1</span> <span class="toc_entry">Unified paper validation</span></a>
+ </li>
+
+  </ul>
+ </li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000007">6 Applications</h1>
+<h1 id="thm:fifo_trap_runtime">6.1 FIFO trap obstruction</h1>
+<p> [FIFO trap]  A trap configuration that blocks progress in FIFO-based algorithms. FifoTrapObstruction.FIFOTrap  </p>
+<p>[FIFO trap runtime]  FIFO traps cause exponential runtime for certain problem instances. FifoTrapObstruction.fifo_trap_exponential def:fifo_trap, thm:negative_drift  </p>
+<h1 id="lem:epistasis_bounds">6.2 Signed epistasis</h1>
+<p> [Signed epistasis skeleton]  A structure encoding epistatic interactions in fitness landscapes. SignedEpistasisSkeleton.SignedEpistasis  </p>
+<p>[Epistasis bounds]  Signed epistasis provides bounds on the number of fitness levels. SignedEpistasisSkeleton.epistasis_level_bound def:epistasis, def:ranking  </p>
+<h1 id="thm:simultaneous_persistence">6.3 Simultaneous persistence</h1>
+<p> [Simultaneous persistence]  Under coevolutionary dynamics, multiple strategies can persist simultaneously. SimultaneousPersistence.simultaneous_persistence_theorem thm:minimax, lem:witness_drift  </p>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0005.html" title="Coupling Arguments"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="index.html" title="Level-Based Theorem Formalization"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0007.html" title="Capstone Validation"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>
