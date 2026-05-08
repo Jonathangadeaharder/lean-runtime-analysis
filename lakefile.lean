@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 
-package «coea_level_based» where
+package «drift_lean» where
   -- CoEA Level-Based Phase Transition formalization
 
 require mathlib from git
@@ -22,5 +22,5 @@ lean_lib «CoEALevelBased» where
              `DriftTheorems.NegativeDrift, `LeCamLowerBound, `LBTCoupling,
              `SignedEpistasisSkeleton]
 
-lean_exe «coea_level_based» where
+lean_exe «drift_lean» where
   root := `Main
