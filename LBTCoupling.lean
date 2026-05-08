@@ -6,13 +6,67 @@ import Mathlib.MeasureTheory.MeasurableSpace.Instances
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 /-!
-# Level-Based Theorem Coupling for r-Local Games (GAP-2 Resolution)
+# Level-Based Theorem Coupling for r-Local Games — Plain-English Summary
 
-## Overview
+This file proves that a simple evolutionary algorithm (the (1+1)-EA with
+bitwise mutation) optimizes any r-local separable game in at most
+O(n² log λ) expected generations, where n is the problem size, r is the
+interaction radius, and λ is the population size.
 
-This file instantiates the Level-Based Theorem (LBT) of Corus et al. (2018)
-for r-local separable games, establishing the O(n² log λ) runtime bound
-(Theorem 8 in the PPSN paper).
+**What is an r-local game?** An r-local game is a fitness landscape where
+each coordinate of the search point interacts with at most r other
+coordinates. Formally, the fitness function decomposes as f(x) = g(x) +
+Σ_k R_k(x), where each residual R_k depends on at most r coordinates.
+The parameter ε < 1/r controls interaction strength.
+
+**What is the Level-Based Theorem (LBT)?** The LBT (Corus, Dang, Erber,
+Lehre 2018) is a general runtime result for population-based algorithms.
+It says: if three geometric drift conditions (G1, G2, G3) hold, then the
+expected time to reach the optimum is O(n² log λ). The three conditions
+are:
+
+- **G1 (Upgrade):** When enough parents are at level ≥ j, the probability
+  of producing an offspring at level ≥ j+1 is bounded below by δ.
+- **G2 (Growth):** Selection amplifies the count of level-j individuals:
+  the probability of sampling level ≥ j grows proportionally to z_j × c/λ.
+- **G3 (Population size):** The population λ is large enough to prevent
+  genetic drift from overwhelming the signal.
+
+**What does this file do?** It instantiates the LBT for r-local games on
+bit strings (OneMax-style level sets). Specifically:
+
+1. It defines the batch-mean fitness estimator F̂ used by the algorithm.
+2. It proves r-local alignment: the estimator respects fitness gaps when
+   ε < 1/r (Theorem 7, fully proved).
+3. It proves the r-local offset bound: estimation error is at most
+   2εr/n (fully proved).
+4. It proves G3 holds with parameters γ₀ = 1/4, δ = 1/n, z* = 1/n
+   (fully proved, no sorry).
+5. It states G1 and G2 as lemmas with the correct Hoeffding-based sample
+   complexity K ≥ C·B²·n²·(1-rε)⁻²·(log λ + log n).
+6. It assembles the final theorem `r_local_runtime_bound`.
+
+**What is not yet proved?** Three results are trusted (sorry):
+- The LBT itself (a textbook probability result, proof deferred).
+- Selection amplification: best-of-λ selection boosts upgrade probability
+  (needs real best-of-λ kernel, not the current placeholder).
+- G2 growth rate: selection amplifies individual counts (same obstruction).
+
+These sorrys are structural: the placeholder kernel `coea_sel_measure`
+equals the mutation-only measure. Closing them requires implementing the
+real best-of-λ selection via Measure.pi + argmax, which needs Mathlib API
+not yet available.
+
+**Key definitions:**
+- `RLocalGame`: structure for r-local games with sparsity bound ε < 1/r.
+- `F_hat`: batch-mean fitness estimator (K evaluations averaged).
+- `A_lvl`: OneMax level sets {x : HammingWeight(x) = j}.
+- `coea_sel_kernel`: the (placeholder) selection kernel.
+- `r_local_runtime_bound`: the main theorem (Theorem 8).
+-/
+
+/-!
+# Technical Documentation
 
 ## Strategy (Option B)
 
