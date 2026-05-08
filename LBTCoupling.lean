@@ -8,10 +8,10 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 /-!
 # Level-Based Theorem Coupling for r-Local Games — Plain-English Summary
 
-This file proves that a simple evolutionary algorithm (the (1+1)-EA with
-bitwise mutation) optimizes any r-local separable game in at most
-O(n² log λ) expected generations, where n is the problem size, r is the
-interaction radius, and λ is the population size.
+This file proves that a simple evolutionary algorithm (a population-based EA
+with bitwise mutation and best-of-λ selection) optimizes any r-local
+separable game in at most O(n² log λ) expected generations, where n is the
+problem size, r is the interaction radius, and λ is the population size.
 
 **What is an r-local game?** An r-local game is a fitness landscape where
 each coordinate of the search point interacts with at most r other
