@@ -20,7 +20,7 @@ lean_lib «CoEALevelBased» where
              `MeanRankingLemma, `GapClosureSolutions, `CheckTypes,
              `DriftTheorems.AdditiveDrift, `DriftTheorems.MultiplicativeDrift,
              `DriftTheorems.NegativeDrift, `LeCamLowerBound, `LBTCoupling,
-             `SignedEpistasisSkeleton]
+             `LBTPreconditions.Private, `SignedEpistasisSkeleton]
 
 lean_exe «coea_level_based» where
   root := `Main
