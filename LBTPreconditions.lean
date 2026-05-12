@@ -1,3 +1,4 @@
+import LBTPreconditions.Private
 import Mathlib.Probability.Kernel.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Defs
@@ -9,8 +10,20 @@ open Classical
 
 /-!
 # Level-Based Theorem (LBT) Preconditions
+
 This module formalizes the three generic geometric drift preconditions required by
 the Level-Based Theorem (Corus et al. 2018) for population-based search heuristics.
+
+## Public API
+
+- `LBT.ConditionG1`: Upgrade probability condition
+- `LBT.ConditionG2`: Growth rate condition
+- `LBT.ConditionG3`: Population size concentration condition
+
+## Internal Helpers
+
+Helper definitions (`A_geq`, `Population`, `pop_count`) are in
+`LBTPreconditions.Private.lean`. They are re-exported here for convenience.
 -/
 
 namespace LBT
@@ -18,21 +31,9 @@ namespace LBT
 variable {X : Type} [Fintype X] [Nonempty X] [MeasurableSpace X] [DiscreteMeasurableSpace X]
 variable {m : ℕ} (hm : m > 0)
 variable (lambda_pop : ℕ) (h_lambda : lambda_pop > 0)
-
--- We partition the search space X into m distinct levels
 variable (A : Fin m → Set X)
 
--- Upward cumulative sets.
-def A_geq (j : Fin m) : Set X :=
-  ⋃ (k : Fin m) (_ : k.val ≥ j.val), A k
-
--- A population is a vector of individuals. By explicitly receiving X, we prevent 
--- metavariable inference failures when constructing kernels.
-abbrev Population (X : Type) (lambda_pop : ℕ) := Fin lambda_pop → X
-
--- Number of individuals in the population belonging to a specific set S.
-noncomputable def pop_count (P : Population X lambda_pop) (S : Set X) : ℕ :=
-  (Finset.univ.filter (fun i => P i ∈ S)).card
+export LBT.Private (A_geq Population pop_count)
 
 variable (D : Kernel (Population X lambda_pop) X) [IsMarkovKernel D]
 
