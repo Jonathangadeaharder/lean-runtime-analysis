@@ -1,0 +1,45 @@
+root: true
+
+exclude:
+  - .git/**
+  - .lake/**
+  - "**/.DS_Store"
+
+rules:
+  max-depth:
+    max: 5
+    exemptions:
+      - ".git/**"
+      - ".lake/**"
+
+  max-files-in-dir:
+    max: 30
+    exemptions:
+      - ".git/**"
+
+  naming-convention:
+    style: "PascalCase"
+    apply-to:
+      - "**/*.lean"
+    exemptions:
+      - ".git/**"
+
+  file-existence:
+    "README.md":
+      rule: "exists:1"
+      exemptions:
+        - "DriftTheorems/**"
+        - "Duality/**"
+        - "blueprint/**"
+    "lakefile.lean":
+      rule: "exists:1"
+      exemptions:
+        - "DriftTheorems/**"
+        - "Duality/**"
+        - "blueprint/**"
+
+  disallowed-patterns:
+    - "*.tmp"
+    - "*.bak"
+    - ".DS_Store"
+    - "*.swp"
