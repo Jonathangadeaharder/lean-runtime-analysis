@@ -82,7 +82,7 @@ theorem interaction_at_all_ones (n : Int) :
     interaction_unit n n 1 = 3 := by
   unfold interaction_unit
   have h : n - 1 - (n - 1) = 0 := by omega
-  rw [h]; native_decide
+  rw [h]; rfl
 
 /--
 The interaction term achieves the value 3*n at x = e_k
