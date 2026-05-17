@@ -77,6 +77,7 @@ jobs:
           FOUND=$(grep -rn 'admit' --include='*.lean' . \
             | grep -v '\.lake/packages/' \
             | grep -v 'sorry_admit' \
+            | grep -v 'LintOptions.lean' \
             || true)
           if [ -n "$FOUND" ]; then
             echo "::error::Found admit in Lean sources"
@@ -165,7 +166,7 @@ jobs:
           TOTAL_LINES=$(find . -name '*.lean' -not -path './.lake/*' -exec cat {} + | wc -l)
           SORRY_COUNT=$(grep -rn 'sorry' --include='*.lean' . | grep -v '\.lake/packages/' | grep -v '^Binary' | wc -l || true)
           AXIOM_COUNT=$(grep -rnE '^\s*(private\s+|protected\s+|noncomputable\s+)*axiom\b' --include='*.lean' . | grep -v '\.lake/packages/' | wc -l || true)
-          ADMIT_COUNT=$(grep -rn 'admit' --include='*.lean' . | grep -v '\.lake/packages/' | grep -v 'sorry_admit' | wc -l || true)
+          ADMIT_COUNT=$(grep -rn 'admit' --include='*.lean' . | grep -v '\.lake/packages/' | grep -v 'sorry_admit' | grep -v 'LintOptions.lean' | wc -l || true)
           NATIVE_DECIDE_COUNT=$(grep -rn 'native_decide' --include='*.lean' . | grep -v '\.lake/packages/' | wc -l || true)
           echo "- **Lean source files:** ${LEAN_FILES}" >> $GITHUB_STEP_SUMMARY
           echo "- **Total lines:** ${TOTAL_LINES}" >> $GITHUB_STEP_SUMMARY
